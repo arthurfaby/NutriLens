@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>NutriLens</title>
+</head>
+
+<body>
+    <h1>NutriLens</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required>
+        <div>
+            <input type="radio" id="smallPlate" name="portionSize" value="smallPlate">
+            <label for="smallPlate">Une petite assiette</label><br>
+            <input type="radio" id="mediumPlate" name="portionSize" value="mediumPlate">
+            <label for="mediumPlate">Une assiette moyenne</label><br>
+            <input type="radio" id="largePlate" name="portionSize" value="largePlate">
+            <label for="largePlate">Une grande assiette</label><br>
+            <input type="radio" id="fullPlate" name="portionSize" value="fullPlate">
+            <label for="fullPlate">Une très grande assiette</label>
+        </div>
+        <input type="submit" value="Upload">
+    </form>
+    <p id="result"></p>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            // Get the selected portion size
+            const portionSize = document.querySelector('input[name="portionSize"]:checked').value;
+            formData.append('portionSize', portionSize);
+
+            const token = localStorage.getItem('jwt'); // Assuming the token is stored in localStorage
+
+            const response = await fetch(e.target.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Authorization': 'Bearer ' + token  // Include the token in the request headers
+                }
+            });
+            const { dishAndCalories } = await response.json();
+
+            document.getElementById('result').innerHTML = '';
+
+            // Create a <ul> element
+            let ulElement = document.createElement('ul');
+
+            // Loop through each dish and create a <li> element
+            dishAndCalories.forEach(dish => {
+                let liElement = document.createElement('li');
+                liElement.textContent = dish;
+                ulElement.appendChild(liElement);
+            });
+
+            // Append the list to the 'result' element
+            document.getElementById('result').appendChild(ulElement);
+        });
+    </script>
+</body>
+
+</html>
