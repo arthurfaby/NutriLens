@@ -12,7 +12,7 @@ Whether you are a fitness enthusiast looking to track your calorie intake, a coo
 
 ## 💻 How to Get Started 💻
 
-To install and start the application, follow the steps below in your terminal:
+To install and start the API, follow the steps below in your terminal:
 
 ```bash
 npm install 
