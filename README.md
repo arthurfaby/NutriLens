@@ -24,3 +24,7 @@ Visit this repository for regular updates and favorite it if you like it!
 If you have any questions, comments, or suggestions, feel free to open an issue or contact us directly.
 
 Embark on your journey to enlightened nutrition with NutriLens!
+
+---
+
+**"Your health begins on your plate."**
