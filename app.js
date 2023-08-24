@@ -38,6 +38,8 @@ const stub = ClarifaiStub.grpc();
 const metadata = new grpc.Metadata();
 metadata.set("authorization", `Key ${clarifaiKey}`);
 
+app.set('trust proxy', 1);
+
 // Middleware pour vérifier le token de OpenAI
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -66,6 +68,7 @@ app.post("/upload", verifyToken, upload.single("image"), async (req, res) => {
       res.sendStatus(403);
     } else {
       const portion = req.body.portionSize;
+      const language = req.body.language;
       const imageFile = fs.readFileSync(req.file.path);
       const encodedImage = Buffer.from(imageFile).toString("base64"); // Use Buffer.from()
 
@@ -110,7 +113,7 @@ app.post("/upload", verifyToken, upload.single("image"), async (req, res) => {
               messages: [
                 {
                   role: "system",
-                  content: `You are an application that receives raw input on foods detected by Clarifai in a photo. Your task is to filter out overlapping and redundant items from the list and then, based on the refined list, create 4 possible dishes. Consider only common combinations of the ingredients and avoid unusual or rare dishes. Each dish should be separated by a ";" and only include the name of the dish (in French) and the estimated number of kilocalories. The figure should be followed by "kcal", without any other words or punctuation (except ";"). Use the following guidelines for portion sizes:  - smallPlate: 150-300 kcal - mediumPlate: 300-550 kcal - largePlate: 550-800 kcal - fullPlate: 800-1200 kcal  Please be conservative in your estimates and keep them within the given range for each portion size. The user is aware that the calorie estimate may not be exact. OUTPUTS ONLY LIKE THE EXAMPLE OUTPUT. Example output: Poulet rôti, x kcal; Spaghetti Bolognaise, x kcal; Salade César, x kcal`,
+                  content: `You are an app that receives an input of foods detected by AI in a photo. Your task is to filter out overlapping and redundant items from the list and, based on the list, create 4 dishes. Consider only common combinations of the ingredients and avoid unusual dishes. Each dish must be separated by a ";" and include the name of the dish (in ${language}, with appropriate special characters), the estimated number of kilocalories and the macronutrients (ONLY the value followed by g). The figure for kilocalories should be followed by "kcal", and the macronutrients by "g" (only the value and the "g", no "carbs", etc.). Use the following guidelines for portion sizes: - unitSize: depends on the product - smallPlate: 150-300 kcal - mediumPlate: 300-550 kcal - largePlate: 550-800 kcal - fullPlate: 800-1200 kcal. If you really cannot keep your estimates within the range, you can go over or under it without any problem. OUTPUTS ONLY LIKE THE EXAMPLE OUTPUT. Example output: Poulet rôti, x kcal, [carbs value] g, [proteins value] g, [fats value] g;...`,
                 },
                 {
                   role: "user",
